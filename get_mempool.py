@@ -41,6 +41,7 @@ def decode_transaction_input(transac):
 
 
 print(eth.is_connected())
+print(eth_fake.is_connected())
 
 '''
 # Get the latest block number
