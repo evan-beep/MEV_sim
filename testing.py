@@ -5,6 +5,9 @@ from web3 import Web3
 # Connect to Ethereum blockchain
 node_url = "https://eth-mainnet.g.alchemy.com/v2/5K4nnjROFZ-KzwP-zW-kjclHNYN8E0sp"
 web3 = Web3(Web3.HTTPProvider(node_url))
+node_fake = "http://127.0.0.1:8545"
+
+eth_fake = Web3(Web3.HTTPProvider(node_fake))
 
 # Ensure Web3 is connected
 if not web3.is_connected():
@@ -51,7 +54,8 @@ pool_data = {
         'address': Web3.to_checksum_address(
             '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'),
         'token0_decimals': 18,
-        'token1_decimals': 6
+        'token1_decimals': 6,
+        'v': 2
     },
     'sushiswap_weth-usdt': {
         'abi':  Web3.to_checksum_address(
@@ -59,23 +63,30 @@ pool_data = {
         'address': Web3.to_checksum_address(
             '0x06da0fd433C1A5d7a4faa01111c044910A184553'),
         'token0_decimals': 18,
-        'token1_decimals': 6
-    }
+        'token1_decimals': 6,
+        'v': 2
+    },
+    'uniswapV3_weth-usdt': {
+        'abi':  Web3.to_checksum_address(
+            '0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36'),
+        'address': Web3.to_checksum_address(
+            '0x4e68Ccd3E89f51C3074ca5072bbAC773960dFa36'),
+        'token0_decimals': 18,
+        'token1_decimals': 6,
+        'v': 3
+    },
+    'pancakeswap_weth-usdt': {
+        'abi':  Web3.to_checksum_address(
+            '0x17C1Ae82D99379240059940093762c5e4539aba5'),
+        'address': Web3.to_checksum_address(
+            '0x17C1Ae82D99379240059940093762c5e4539aba5'),
+        'token0_decimals': 18,
+        'token1_decimals': 6,
+        'v': 2
+    },
 }
 
 latest_block = 18769472  # eth.eth.block_number
-
-interested_pool = pool_data['uniswapV2_weth-usdt']
-
-pool_abi = get_contract_abi(interested_pool['abi'])
-pool_contract = web3.eth.contract(
-    address=interested_pool['address'], abi=get_contract_abi(interested_pool['abi']))
-try:
-    reserves = pool_contract.functions.slot0().call(block_identifier=latest_block)
-except:
-    reserves = pool_contract.functions.getReserves().call(block_identifier=latest_block)
-
-print(reserves)
 
 
 def calculate_price_uniswap_v2(reserve0, reserve1, token0_decimals, token1_decimals):
@@ -98,7 +109,23 @@ def sqrt_price_x96_to_price(sqrt_price_x96, token0_decimals, token1_decimals):
     return price0, price1
 
 
-# print(sqrt_price_x96_to_price(
-#    reserves[0], interested_pool['token0_decimals'], interested_pool['token1_decimals']))
-print(calculate_price_uniswap_v2(
-    reserves[0], reserves[1], interested_pool['token0_decimals'], interested_pool['token1_decimals']))
+def calc_price(interested_pool_name):
+    interested_pool = pool_data[interested_pool_name]
+
+    pool_contract = eth_fake.eth.contract(
+        address=interested_pool['address'], abi=get_contract_abi(interested_pool['abi']))
+    try:
+        reserves = pool_contract.functions.slot0().call(block_identifier=latest_block)
+    except:
+        reserves = pool_contract.functions.getReserves().call(block_identifier=latest_block)
+
+    if interested_pool['v'] == 2:
+        return calculate_price_uniswap_v2(
+            reserves[0], reserves[1], interested_pool['token0_decimals'], interested_pool['token1_decimals'])
+    elif interested_pool['v'] == 3:
+        return sqrt_price_x96_to_price(
+            reserves[0], interested_pool['token0_decimals'], interested_pool['token1_decimals'])
+
+
+print(calc_price('sushiswap_weth-usdt'))
+print(calc_price('pancakeswap_weth-usdt'))
