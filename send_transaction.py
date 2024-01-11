@@ -24,7 +24,8 @@ if __name__ == '__main__':
     print(len(eth_fake.eth._accounts()))
     print(eth_fake.is_connected())
     print(eth_fake.eth.get_balance(whale_acc))
+    print(len(eth_fake.geth.personal.list_accounts()))
     print(send_transaction(eth_fake,
-          '0xea34C24f3F8f15C0FaCc04f26E7D8870672Cd9Bf',
-           whale_acc,
-          100000000000000))
+          '0x0ea7A41e4700a5e4b2CbBD1a86de2Ed803C4C96F',
+                           whale_acc,
+                           100000000000000))

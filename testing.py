@@ -28,7 +28,7 @@ def get_contract_abi(contract_address):
 
 # data of pools
 pool_data = {
-    'uniswap_usdc-eth': {
+    'uniswap_usdc-weth': {
         'abi':  Web3.to_checksum_address(
             '0x8f8EF111B67C04Eb1641f5ff19EE54Cda062f163'),
         'address': Web3.to_checksum_address(
@@ -44,11 +44,20 @@ pool_data = {
         'token0_decimals': 8,
         'token1_decimals': 18
     },
-    'uniswapV2_eth-usdt': {
+
+    'uniswapV2_weth-usdt': {
         'abi':  Web3.to_checksum_address(
-            '0xC75650fe4D14017b1e12341A97721D5ec51D5340'),
+            '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'),
         'address': Web3.to_checksum_address(
-            '0x6C3e4cb2E96B01F4b866965A91ed4437839A121a'),
+            '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'),
+        'token0_decimals': 18,
+        'token1_decimals': 6
+    },
+    'sushiswap_weth-usdt': {
+        'abi':  Web3.to_checksum_address(
+            '0x06da0fd433C1A5d7a4faa01111c044910A184553'),
+        'address': Web3.to_checksum_address(
+            '0x06da0fd433C1A5d7a4faa01111c044910A184553'),
         'token0_decimals': 18,
         'token1_decimals': 6
     }
@@ -56,13 +65,29 @@ pool_data = {
 
 latest_block = 18769472  # eth.eth.block_number
 
-interested_pool = pool_data['uniswap_wbtc-eth']
+interested_pool = pool_data['uniswapV2_weth-usdt']
 
 pool_abi = get_contract_abi(interested_pool['abi'])
 pool_contract = web3.eth.contract(
     address=interested_pool['address'], abi=get_contract_abi(interested_pool['abi']))
-reserves = pool_contract.functions.slot0().call(block_identifier=latest_block)
+try:
+    reserves = pool_contract.functions.slot0().call(block_identifier=latest_block)
+except:
+    reserves = pool_contract.functions.getReserves().call(block_identifier=latest_block)
+
 print(reserves)
+
+
+def calculate_price_uniswap_v2(reserve0, reserve1, token0_decimals, token1_decimals):
+    # Adjust reserves for token decimals
+    adjusted_reserve0 = reserve0 * (10 ** token1_decimals)
+    adjusted_reserve1 = reserve1 * (10 ** token0_decimals)
+
+    # Calculate prices
+    price_of_token0_in_terms_of_token1 = adjusted_reserve1 / adjusted_reserve0
+    price_of_token1_in_terms_of_token0 = adjusted_reserve0 / adjusted_reserve1
+
+    return price_of_token0_in_terms_of_token1, price_of_token1_in_terms_of_token0
 
 
 def sqrt_price_x96_to_price(sqrt_price_x96, token0_decimals, token1_decimals):
@@ -73,5 +98,7 @@ def sqrt_price_x96_to_price(sqrt_price_x96, token0_decimals, token1_decimals):
     return price0, price1
 
 
-print(sqrt_price_x96_to_price(
-    reserves[0], interested_pool['token0_decimals'], interested_pool['token1_decimals']))
+# print(sqrt_price_x96_to_price(
+#    reserves[0], interested_pool['token0_decimals'], interested_pool['token1_decimals']))
+print(calculate_price_uniswap_v2(
+    reserves[0], reserves[1], interested_pool['token0_decimals'], interested_pool['token1_decimals']))
