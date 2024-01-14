@@ -26,6 +26,8 @@ if __name__ == '__main__':
     print(eth_fake.eth.get_balance(whale_acc))
     print(len(eth_fake.geth.personal.list_accounts()))
     print(send_transaction(eth_fake,
-          '0x0ea7A41e4700a5e4b2CbBD1a86de2Ed803C4C96F',
-                           whale_acc,
-                           100000000000000))
+          Web3.to_checksum_address(
+              '0xF53E6abCAc2dC3236A2c3a5ea72494A166Bc7A60'),
+        Web3.to_checksum_address(
+              '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852'),
+        100000000000000))
