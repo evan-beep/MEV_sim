@@ -127,5 +127,6 @@ def calc_price(interested_pool_name):
             reserves[0], interested_pool['token0_decimals'], interested_pool['token1_decimals'])
 
 
-print(calc_price('sushiswap_weth-usdt'))
-print(calc_price('pancakeswap_weth-usdt'))
+if __name__ == "__main__":
+    print(calc_price('sushiswap_weth-usdt'))
+    print(calc_price('pancakeswap_weth-usdt'))
