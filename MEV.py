@@ -1,48 +1,25 @@
-from web3 import Web3
 
-# Initialize Web3 and connect to Ethereum node
-w3 = Web3(Web3.HTTPProvider('YOUR_PROVIDER_URL'))
+import matplotlib.pyplot as plt
 
-# Uniswap V2 Pair Contract Address and ABI
-uniswap_pair_contract_address = 'YOUR_UNISWAP_PAIR_CONTRACT_ADDRESS'
-uniswap_pair_abi = 'YOUR_UNISWAP_PAIR_ABI'
+latest_profits = [
+    0.000278987524689089, 0.303849186572152733, 0.611884000317049781, 0.924298987638256967,
+    1.241008311436963839, 1.561924867015727842, 1.886960399761375466, 2.216025624850245499,
+    2.549030334690846866, 2.885883508764390158, 3.226493415429181776, 3.570767707907618623,
+    3.918613522240821187, 4.269937563774350560, 4.624646194450399574, 4.982645515431999028,
+    5.343841445080725733, 5.708139794199615654, 6.075446335639861140, 6.445666875343381542,
+    6.818707315648558566, 7.194473717142115974, 7.572872358072904465, 7.953809787195529795,
+    8.337192880707179054, 8.722928892378629418, 9.110925497817756202, 9.501090841217661480,
+    9.893333581436055787, 10.287562927769387110, 10.683688680372015110, 11.081621266092661901,
+    11.481271773828783155, 11.882551983390636688, 12.285374399234637019, 12.689652276983581660,
+    13.095299649649114000, 13.502231353838004325, 13.910363050241017054, 14.319611251080517098
+]
+transactions = [100 + 500*i for i in range(40)]
 
-# Create Contract Instance
-uniswap_pair_contract = w3.eth.contract(
-    address=uniswap_pair_contract_address, abi=uniswap_pair_abi)
-
-
-def get_price_impact(amount_in, reserve_in, reserve_out):
-    """
-    Calculate price impact of a swap.
-    :param amount_in: Amount of tokens being swapped in.
-    :param reserve_in: Reserve of the input token in the liquidity pool.
-    :param reserve_out: Reserve of the output token in the liquidity pool.
-    :return: Price impact as a percentage.
-    """
-    # Uniswap uses a 0.3% fee, adjust amount for the fee
-    amount_in_with_fee = amount_in * 0.997
-    new_reserve_in = reserve_in + amount_in_with_fee
-    new_reserve_out = reserve_out - \
-        (amount_in_with_fee * reserve_out) / new_reserve_in
-    price_impact = ((reserve_out / reserve_in) -
-                    (new_reserve_out / new_reserve_in)) * 100
-    return price_impact
-
-
-def main():
-    # Fetch Current Reserves
-    reserves = uniswap_pair_contract.functions.getReserves().call()
-    reserve_a = reserves[0]
-    reserve_b = reserves[1]
-
-    # Example: Calculate the impact of swapping 100 tokens
-    # Note: This assumes token A is being swapped for token B.
-    # Replace `amount_swapped` with the actual swap amount
-    amount_swapped = 100
-    impact = get_price_impact(amount_swapped, reserve_a, reserve_b)
-    print(f"Price impact of swapping {amount_swapped} tokens: {impact:.2f}%")
-
-
-if __name__ == "__main__":
-    main()
+plt.style.use('dark_background')
+plt.figure(figsize=(10, 6))
+plt.plot(transactions, latest_profits, marker='o', color='cyan')
+plt.xlabel('Transaction Amount in ETH', color='white')
+plt.ylabel('Profit in WETH', color='white')
+plt.title('Latest Profit in WETH vs. Transaction Amount in ETH', color='white')
+plt.grid(True, color='gray')
+plt.show()

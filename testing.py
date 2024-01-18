@@ -110,7 +110,16 @@ def sqrt_price_x96_to_price(sqrt_price_x96, token0_decimals, token1_decimals):
 
 
 def calc_price(interested_pool_name):
-    interested_pool = pool_data[interested_pool_name]
+    try:
+        interested_pool = pool_data[interested_pool_name]
+    except:
+        interested_pool = {
+            'address': interested_pool_name,
+            'abi': interested_pool_name,
+            'v': 2,
+            'token0_decimals': 18,
+            'token1_decimals': 6
+        }
 
     pool_contract = eth_fake.eth.contract(
         address=interested_pool['address'], abi=get_contract_abi(interested_pool['abi']))
